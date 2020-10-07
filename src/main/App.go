@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/gorilla/mux"
 	. "github.com/hsedjame/products-api/src/main/api"
 	. "github.com/hsedjame/products-api/src/main/repository/impl"
@@ -21,15 +22,16 @@ func (app App) start() {
 	router := mux.NewRouter()
 
 	for _, controller := range app.controllers {
-		controller := controller
-
-		go func() {
-			subRouter := router.PathPrefix(controller.Path()).Subrouter()
-			subRouter.Use(controller.Middleware)
-			controller.AddRoutes(subRouter)
-		}()
-
+		subRouter := router.PathPrefix(controller.Path()).Subrouter()
+		subRouter.Use(controller.Middleware)
+		controller.AddRoutes(subRouter)
 	}
+
+	/* Configure route to Documentation */
+	redocOpts := middleware.RedocOpts{SpecURL: "../../swagger.yaml"}
+	redoc := middleware.Redoc(redocOpts, nil)
+	router.Handle("/docs", redoc).Methods(http.MethodGet)
+	router.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
 
 	server := &http.Server{
 		Addr:              ":8080",

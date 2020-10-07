@@ -1,3 +1,30 @@
+// Package api Product API.
+//
+// the purpose of this application is to provide an application
+// that is using plain go code to define an API
+//
+// This should demonstrate all the possible comment annotations
+// that are available to turn go code into a fully compliant swagger 2.0 spec
+//
+// Terms Of Service:
+//
+// there are no TOS at this moment, use at your own risk we take no responsibility
+//
+//     Schemes: http
+//     Host: localhost
+//     BasePath: /
+//     Version: 0.0.1
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//     - application/json
+//
+//     Security:
+//     - api_key:
+//
+// swagger:meta
 package api
 
 import (
@@ -30,11 +57,11 @@ func (pCtrl ProductController) AddRoutes(router *mux.Router) {
 		Methods(http.MethodPost)
 
 	router.
-		HandleFunc("/{id:[0-9]+}", pCtrl.handler.GetProduct).
+		HandleFunc("/{id:[0-9]+}", pCtrl.handler.GetProductById).
 		Methods(http.MethodGet)
 
 	router.
-		HandleFunc("/{name}", pCtrl.handler.GetProduct).
+		HandleFunc("/{name}", pCtrl.handler.GetProductByName).
 		Methods(http.MethodGet)
 
 	router.
