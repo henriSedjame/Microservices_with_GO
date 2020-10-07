@@ -39,7 +39,7 @@ func (repo *SimpleProductRepository) GetById(id int) Product {
 
 	for _, p := range repo.products {
 		if p.ID == id {
-			prod = *p
+			prod = p
 			break
 		}
 	}
@@ -53,7 +53,7 @@ func (repo *SimpleProductRepository) GetByName(name string) Product {
 
 	for _, p := range repo.products {
 		if p.Name == name {
-			prod = *p
+			prod = p
 			break
 		}
 	}
@@ -76,7 +76,7 @@ func (repo *SimpleProductRepository) Create(product Product) Products {
 	}
 	product.ID = id
 	product.CreationDate = time.Now().UTC().String()
-	repo.products = append(repo.products, &product)
+	repo.products = append(repo.products, product)
 
 	return repo.products
 }
@@ -86,9 +86,9 @@ func (repo *SimpleProductRepository) Update(product Product) Products {
 	repo.logger.Printf("Mise à jour du produit : %#v", product)
 
 	for _, p := range repo.products {
-		if product.ID == (*p).ID {
+		if product.ID == p.ID {
 			product.UpdateDate = time.Now().UTC().String()
-			repo.products = append(repo.products, &product)
+			repo.products = append(repo.products, product)
 			break
 		}
 	}

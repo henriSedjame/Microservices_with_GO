@@ -19,7 +19,7 @@ type Product struct {
 	// the name for this product
 	//
 	// required: true
-	Name string `json:"name" validate:"required"`
+	Name string `json:"name"`
 
 	// the description for this product
 	//
@@ -29,13 +29,13 @@ type Product struct {
 	// the price for this product
 	//
 	// min: 0
-	Price float32 `json:"price" validate:"gt=0"`
+	Price float32 `json:"price"`
 
 	// the sku for this product
 	//
 	// required: true
 	// pattern: [a-z]+-[a-z]+-[a-z]+
-	SKU          string `json:"sku" validate:"required,sku"`
+	SKU          string `json:"sku"`
 	CreationDate string `json:"-"`
 	UpdateDate   string `json:"-"`
 	RemovalDate  string `json:"-"`

@@ -49,11 +49,11 @@ func (pCtrl ProductController) Path() string {
 func (pCtrl ProductController) AddRoutes(router *mux.Router) {
 
 	router.
-		HandleFunc("/", pCtrl.handler.GetProducts).
+		HandleFunc("", pCtrl.handler.GetProducts).
 		Methods(http.MethodGet)
 
 	router.
-		HandleFunc("/", pCtrl.handler.CreateProduct).
+		HandleFunc("", pCtrl.handler.CreateProduct).
 		Methods(http.MethodPost)
 
 	router.
@@ -65,11 +65,11 @@ func (pCtrl ProductController) AddRoutes(router *mux.Router) {
 		Methods(http.MethodGet)
 
 	router.
-		HandleFunc("/", pCtrl.handler.UpdateProduct).
+		HandleFunc("", pCtrl.handler.UpdateProduct).
 		Methods(http.MethodPut)
 
 	router.
-		HandleFunc("/", pCtrl.handler.DeleteProduct).
+		HandleFunc("", pCtrl.handler.DeleteProduct).
 		Methods(http.MethodDelete)
 }
 

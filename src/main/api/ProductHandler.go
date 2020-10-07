@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"github.com/gorilla/mux"
 	. "github.com/hsedjame/products-api/src/main/models"
 	. "github.com/hsedjame/products-api/src/main/repository"
@@ -44,31 +45,6 @@ func (handler *ProductHandler) GetProducts(wr http.ResponseWriter, _ *http.Reque
 	return
 }
 
-// swagger:operation GET /products/{id}  productById getProductById
-//
-// Retrieve a specific product by its id
-//
-// ---
-//	consumes:
-//	- application/json
-//
-//	produces:
-//	- application/json
-//
-// parameters:
-// - name: id
-//   in: path
-//   description: id of product
-//   required: true
-//   type: integer
-//
-//
-// responses:
-//   '200':
-//     description: product found
-//     schema:
-//       "$ref": "#/definitions/Product"
-//
 func (handler *ProductHandler) GetProductById(wr http.ResponseWriter, rq *http.Request) {
 
 	pathParams := mux.Vars(rq)
@@ -166,7 +142,7 @@ func (handler *ProductHandler) CreateProduct(wr http.ResponseWriter, rq *http.Re
 	var prod Product
 
 	if err := prod.FromJson(rq.Body); err != nil {
-		http.Error(wr, "", http.StatusBadRequest)
+		http.Error(wr, fmt.Sprintf("%s", err), http.StatusBadRequest)
 		return
 	}
 	products := handler.repoditory.Create(prod)

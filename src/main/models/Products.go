@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-type Products []*Product
+type Products []Product
 
 func (prods Products) ToJson(wr io.Writer) error {
 	return json.NewEncoder(wr).Encode(prods)
