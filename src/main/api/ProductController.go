@@ -1,7 +1,9 @@
 package api
 
 import (
+	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/hsedjame/products-api/src/main/models"
 	"net/http"
 )
 
@@ -44,3 +46,18 @@ func (pCtrl ProductController) AddRoutes(router *mux.Router) {
 		Methods(http.MethodDelete)
 }
 
+func (pCtrl ProductController) Middleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(wr http.ResponseWriter, rq *http.Request) {
+
+		if rq.Method == http.MethodPost {
+			var prod models.Product
+			if err := prod.FromJson(rq.Body); err != nil {
+				http.Error(wr, fmt.Sprintf("Invalid request %s", err), http.StatusBadRequest)
+			} else if err := prod.Validate(); err != nil {
+				http.Error(wr, fmt.Sprintf("Invalid request %s", err), http.StatusBadRequest)
+			}
+		}
+
+		next.ServeHTTP(wr, rq)
+	})
+}

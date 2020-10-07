@@ -1,15 +1,14 @@
 package impl
 
 import (
-	. "github.com/hsedjame/products-api/src/models"
+	. "github.com/hsedjame/products-api/src/main/models"
 	"log"
 	"sort"
 	"time"
 )
 
-
 type SimpleProductRepository struct {
-	logger *log.Logger
+	logger   *log.Logger
 	products Products
 }
 
@@ -86,7 +85,7 @@ func (repo *SimpleProductRepository) Update(product Product) Products {
 
 	repo.logger.Printf("Mise à jour du produit : %#v", product)
 
-	for _,p := range repo.products {
+	for _, p := range repo.products {
 		if product.ID == (*p).ID {
 			product.UpdateDate = time.Now().UTC().String()
 			repo.products = append(repo.products, &product)
@@ -101,7 +100,7 @@ func (repo *SimpleProductRepository) Delete(id int) bool {
 
 	repo.logger.Printf("Suppression du produit ayant l'ID %d", id)
 
-	for i,p := range repo.products {
+	for i, p := range repo.products {
 		if id == p.ID {
 
 			p.RemovalDate = time.Now().UTC().String()

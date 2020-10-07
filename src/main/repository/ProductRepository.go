@@ -1,7 +1,7 @@
 package repository
 
 import (
-	. "github.com/hsedjame/products-api/src/models"
+	. "github.com/hsedjame/products-api/src/main/models"
 )
 
 type ProductRepository interface {

@@ -2,30 +2,30 @@ package api
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/hsedjame/products-api/src/models"
-	"github.com/hsedjame/products-api/src/repository"
+	. "github.com/hsedjame/products-api/src/main/models"
+	. "github.com/hsedjame/products-api/src/main/repository"
 	"net/http"
 	"strconv"
 )
 
 type ProductHandler struct {
-	repoditory repository.ProductRepository
+	repoditory ProductRepository
 }
 
-func NewProductHandler(productRepository repository.ProductRepository) *ProductHandler {
+func NewProductHandler(productRepository ProductRepository) *ProductHandler {
 	return &ProductHandler{repoditory: productRepository}
 }
 
-func (handler *ProductHandler) GetProducts(wr http.ResponseWriter, _ *http.Request)  {
+func (handler *ProductHandler) GetProducts(wr http.ResponseWriter, _ *http.Request) {
 	products := handler.repoditory.GetAll()
-	if err:=products.ToJson(wr); err !=nil {
+	if err := products.ToJson(wr); err != nil {
 		http.Error(wr, "", http.StatusBadRequest)
 		return
 	}
 	return
 }
 
-func (handler *ProductHandler) GetProduct(wr http.ResponseWriter, rq *http.Request)  {
+func (handler *ProductHandler) GetProduct(wr http.ResponseWriter, rq *http.Request) {
 
 	pathParams := mux.Vars(rq)
 
@@ -55,9 +55,9 @@ func (handler *ProductHandler) GetProduct(wr http.ResponseWriter, rq *http.Reque
 	return
 }
 
-func (handler *ProductHandler) CreateProduct(wr http.ResponseWriter, rq *http.Request)  {
+func (handler *ProductHandler) CreateProduct(wr http.ResponseWriter, rq *http.Request) {
 
-	var prod models.Product
+	var prod Product
 
 	if err := prod.FromJson(rq.Body); err != nil {
 		http.Error(wr, "", http.StatusBadRequest)
@@ -65,7 +65,7 @@ func (handler *ProductHandler) CreateProduct(wr http.ResponseWriter, rq *http.Re
 	}
 	products := handler.repoditory.Create(prod)
 
-	if err:=products.ToJson(wr); err !=nil {
+	if err := products.ToJson(wr); err != nil {
 		http.Error(wr, "", http.StatusBadRequest)
 		return
 	}
@@ -73,9 +73,9 @@ func (handler *ProductHandler) CreateProduct(wr http.ResponseWriter, rq *http.Re
 	return
 }
 
-func (handler *ProductHandler) UpdateProduct(wr http.ResponseWriter, rq *http.Request)  {
+func (handler *ProductHandler) UpdateProduct(wr http.ResponseWriter, rq *http.Request) {
 
-	var prod models.Product
+	var prod Product
 
 	if err := prod.FromJson(rq.Body); err != nil {
 		http.Error(wr, "", http.StatusBadRequest)
@@ -83,7 +83,7 @@ func (handler *ProductHandler) UpdateProduct(wr http.ResponseWriter, rq *http.Re
 	}
 	products := handler.repoditory.Update(prod)
 
-	if err:=products.ToJson(wr); err !=nil {
+	if err := products.ToJson(wr); err != nil {
 		http.Error(wr, "", http.StatusBadRequest)
 		return
 	}
@@ -91,7 +91,7 @@ func (handler *ProductHandler) UpdateProduct(wr http.ResponseWriter, rq *http.Re
 	return
 }
 
-func (handler *ProductHandler) DeleteProduct(wr http.ResponseWriter, rq *http.Request)  {
+func (handler *ProductHandler) DeleteProduct(wr http.ResponseWriter, rq *http.Request) {
 
 	pathParams := mux.Vars(rq)
 

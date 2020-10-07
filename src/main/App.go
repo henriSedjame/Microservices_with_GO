@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"github.com/gorilla/mux"
-	. "github.com/hsedjame/products-api/src/api"
-	"github.com/hsedjame/products-api/src/repository/impl"
+	. "github.com/hsedjame/products-api/src/main/api"
+	. "github.com/hsedjame/products-api/src/main/repository/impl"
 	"log"
 	"net/http"
 	"os"
@@ -21,8 +21,14 @@ func (app App) start() {
 	router := mux.NewRouter()
 
 	for _, controller := range app.controllers {
-		subRouter := router.PathPrefix(controller.Path()).Subrouter()
-		controller.AddRoutes(subRouter)
+		controller := controller
+
+		go func() {
+			subRouter := router.PathPrefix(controller.Path()).Subrouter()
+			subRouter.Use(controller.Middleware)
+			controller.AddRoutes(subRouter)
+		}()
+
 	}
 
 	server := &http.Server{
@@ -64,7 +70,8 @@ func runAndStopServerGracefully(server *http.Server) {
 }
 
 func main() {
-	productRepository := impl.NewSimpleProductRepository(log.New(os.Stdout, "[[products-api]]", log.LstdFlags))
+
+	productRepository := NewSimpleProductRepository(log.New(os.Stdout, "[[products-api]]", log.LstdFlags))
 	productHandler := NewProductHandler(productRepository)
 
 	App{controllers: []RestController{
