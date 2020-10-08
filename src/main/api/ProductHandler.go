@@ -1,8 +1,8 @@
 package api
 
 import (
-	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/hsedjame/products-api/src/main/core"
 	. "github.com/hsedjame/products-api/src/main/models"
 	. "github.com/hsedjame/products-api/src/main/repository"
 	"net/http"
@@ -36,10 +36,16 @@ func NewProductHandler(productRepository ProductRepository) *ProductHandler {
 //       type: array
 //       items:
 //         "$ref": "#/definitions/Product"
+//   '400':
+//     description: bad request
+//     schema:
+//       "$ref": "#/definitions/GenericError"
 func (handler *ProductHandler) GetProducts(wr http.ResponseWriter, _ *http.Request) {
+
 	products := handler.repoditory.GetAll()
 	if err := products.ToJson(wr); err != nil {
-		http.Error(wr, "", http.StatusBadRequest)
+		wr.WriteHeader(http.StatusBadRequest)
+		_ = core.ToJson(GenericError{Message: err.Error()}, wr)
 		return
 	}
 	return
@@ -55,8 +61,9 @@ func (handler *ProductHandler) GetProductById(wr http.ResponseWriter, rq *http.R
 			return
 		} else {
 			product := handler.repoditory.GetById(id)
-			if err := product.ToJson(wr); err != nil {
-				http.Error(wr, "", http.StatusBadRequest)
+			if err := core.ToJson(product, wr); err != nil {
+				wr.WriteHeader(http.StatusBadRequest)
+				_ = core.ToJson(GenericError{Message: err.Error()}, wr)
 				return
 			}
 			return
@@ -64,7 +71,8 @@ func (handler *ProductHandler) GetProductById(wr http.ResponseWriter, rq *http.R
 
 	}
 
-	http.Error(wr, "", http.StatusBadRequest)
+	wr.WriteHeader(http.StatusBadRequest)
+	_ = core.ToJson(GenericError{Message: "Parameter 'id' required"}, wr)
 	return
 }
 
@@ -93,20 +101,26 @@ func (handler *ProductHandler) GetProductById(wr http.ResponseWriter, rq *http.R
 //     schema:
 //       "$ref": "#/definitions/Product"
 //
+//   '400':
+//     description: bad request
+//     schema:
+//       "$ref": "#/definitions/GenericError"
 func (handler *ProductHandler) GetProductByName(wr http.ResponseWriter, rq *http.Request) {
 
 	pathParams := mux.Vars(rq)
 
 	if name := pathParams["name"]; name != "" {
 		product := handler.repoditory.GetByName(name)
-		if err := product.ToJson(wr); err != nil {
-			http.Error(wr, "", http.StatusBadRequest)
+		if err := core.ToJson(product, wr); err != nil {
+			wr.WriteHeader(http.StatusBadRequest)
+			_ = core.ToJson(GenericError{Message: err.Error()}, wr)
 			return
 		}
 		return
 	}
 
-	http.Error(wr, "", http.StatusBadRequest)
+	wr.WriteHeader(http.StatusBadRequest)
+	_ = core.ToJson(GenericError{Message: "Parameter 'name' required "}, wr)
 	return
 }
 
@@ -137,18 +151,27 @@ func (handler *ProductHandler) GetProductByName(wr http.ResponseWriter, rq *http
 //       type: array
 //       items:
 //         "$ref": "#/definitions/Product"
+//   '400':
+//     description: bad request
+//     schema:
+//       "$ref": "#/definitions/GenericError"
+//   '406':
+//     description: not acceptable error
+//     schema:
+//       "$ref": "#/definitions/ValidationError"
+//   '500':
+//     description: internal server error
+//     schema:
+//       "$ref": "#/definitions/GenericError"
 func (handler *ProductHandler) CreateProduct(wr http.ResponseWriter, rq *http.Request) {
 
-	var prod Product
+	prod := rq.Context().Value(ProductKey{}).(Product)
 
-	if err := prod.FromJson(rq.Body); err != nil {
-		http.Error(wr, fmt.Sprintf("%s", err), http.StatusBadRequest)
-		return
-	}
 	products := handler.repoditory.Create(prod)
 
 	if err := products.ToJson(wr); err != nil {
-		http.Error(wr, "", http.StatusBadRequest)
+		wr.WriteHeader(http.StatusBadRequest)
+		_ = core.ToJson(GenericError{Message: err.Error()}, wr)
 		return
 	}
 
@@ -182,18 +205,27 @@ func (handler *ProductHandler) CreateProduct(wr http.ResponseWriter, rq *http.Re
 //       type: array
 //       items:
 //         "$ref": "#/definitions/Product"
+//   '400':
+//     description: bad request
+//     schema:
+//       "$ref": "#/definitions/GenericError"
+//   '406':
+//     description: request not acceptable error
+//     schema:
+//       "$ref": "#/definitions/ValidationError"
+//   '500':
+//     description: internal server error
+//     schema:
+//       "$ref": "#/definitions/GenericError"
 func (handler *ProductHandler) UpdateProduct(wr http.ResponseWriter, rq *http.Request) {
 
-	var prod Product
+	prod := rq.Context().Value(ProductKey{}).(Product)
 
-	if err := prod.FromJson(rq.Body); err != nil {
-		http.Error(wr, "", http.StatusBadRequest)
-		return
-	}
 	products := handler.repoditory.Update(prod)
 
 	if err := products.ToJson(wr); err != nil {
-		http.Error(wr, "", http.StatusBadRequest)
+		wr.WriteHeader(http.StatusBadRequest)
+		_ = core.ToJson(GenericError{Message: err.Error()}, wr)
 		return
 	}
 
@@ -223,7 +255,10 @@ func (handler *ProductHandler) UpdateProduct(wr http.ResponseWriter, rq *http.Re
 //     description: product updated successfully
 //     schema:
 //       type: boolean
-
+//   '500':
+//     description: internal server error
+//     schema:
+//       "$ref": "#/definitions/GenericError"
 func (handler *ProductHandler) DeleteProduct(wr http.ResponseWriter, rq *http.Request) {
 
 	pathParams := mux.Vars(rq)
@@ -237,7 +272,8 @@ func (handler *ProductHandler) DeleteProduct(wr http.ResponseWriter, rq *http.Re
 				wr.WriteHeader(http.StatusOK)
 				return
 			} else {
-				http.Error(wr, "", http.StatusInternalServerError)
+				wr.WriteHeader(http.StatusInternalServerError)
+				_ = core.ToJson(GenericError{Message: "Une erreur inatendue s'est produite"}, wr)
 				return
 			}
 		}

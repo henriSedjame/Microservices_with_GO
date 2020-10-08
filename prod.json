@@ -1,5 +1,6 @@
 {
-  "id": 1,
-  "name" : "Cappucino"
-
+  "id" :1,
+  "name" : "Cappucino",
+  "price": 4.5,
+  "sku": ""
 }

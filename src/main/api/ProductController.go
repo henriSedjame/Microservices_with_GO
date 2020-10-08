@@ -28,8 +28,10 @@
 package api
 
 import (
-	"fmt"
+	"context"
+	"github.com/go-playground/validator"
 	"github.com/gorilla/mux"
+	"github.com/hsedjame/products-api/src/main/core"
 	"github.com/hsedjame/products-api/src/main/models"
 	"net/http"
 )
@@ -76,13 +78,27 @@ func (pCtrl ProductController) AddRoutes(router *mux.Router) {
 func (pCtrl ProductController) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(wr http.ResponseWriter, rq *http.Request) {
 
-		if rq.Method == http.MethodPost {
+		wr.Header().Add("Content-type", "application/json")
+
+		if rq.Method == http.MethodPost || rq.Method == http.MethodPut {
 			var prod models.Product
-			if err := prod.FromJson(rq.Body); err != nil {
-				http.Error(wr, fmt.Sprintf("Invalid request %s", err), http.StatusBadRequest)
+			if err := core.FromJson(prod, rq.Body); err != nil {
+				wr.WriteHeader(http.StatusBadRequest)
+				_ = core.ToJson(models.GenericError{Message: err.Error()}, wr)
+				return
 			} else if err := prod.Validate(); err != nil {
-				http.Error(wr, fmt.Sprintf("Invalid request %s", err), http.StatusBadRequest)
+				wr.WriteHeader(http.StatusNotAcceptable)
+				_ = core.ToJson(models.ValidationError{Messages: err.(validator.ValidationErrors).Error()}, wr)
+				return
 			}
+
+			ctx := context.WithValue(rq.Context(), ProductKey{}, prod)
+
+			rq := rq.WithContext(ctx)
+
+			next.ServeHTTP(wr, rq)
+
+			return
 		}
 
 		next.ServeHTTP(wr, rq)
