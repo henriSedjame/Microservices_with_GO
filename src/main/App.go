@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	. "github.com/hsedjame/products-api/src/main/api"
 	. "github.com/hsedjame/products-api/src/main/repository/impl"
@@ -21,6 +22,7 @@ func (app App) start() {
 
 	router := mux.NewRouter()
 
+	/* Adding routes of each controllers */
 	for _, controller := range app.controllers {
 		subRouter := router.PathPrefix(controller.Path()).Subrouter()
 		subRouter.Use(controller.Middleware)
@@ -33,14 +35,20 @@ func (app App) start() {
 	router.Handle("/docs", redoc).Methods(http.MethodGet)
 	router.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
 
+	/* Configure CORS */
+	corsHandler := handlers.CORS(
+		handlers.AllowedOrigins([]string{"*"}))
+
+	/* Create the server */
 	server := &http.Server{
 		Addr:              ":8080",
-		Handler:           router,
+		Handler:           corsHandler(router),
 		IdleTimeout:       120 * time.Second,
 		ReadHeaderTimeout: time.Second,
 		WriteTimeout:      time.Second,
 	}
 
+	/* Manage start and stop of the server */
 	runAndStopServerGracefully(server)
 }
 
